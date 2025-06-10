@@ -47,60 +47,60 @@ delete_instance_menu() {
     echo "============"
     
     if [ ! -d "$CLAUDE_INSTANCES_BASE" ]; then
-        echo "❌ 未找到任何实例"
+        echo "❌ 未找到任何实例 No instances found"
         return
     fi
     
-    echo "现有实例:"
+    echo "现有实例 Existing instances:"
     ls -1 "$CLAUDE_INSTANCES_BASE" 2>/dev/null | grep -v "^scripts$" | sed 's/^/  - /' | nl
     
     echo ""
-    read -p "输入要删除的实例名称: " instance_to_delete
+    read -p "输入要删除的实例名称 Enter instance name to delete: " instance_to_delete
     
     if [ -z "$instance_to_delete" ]; then
-        echo "❌ 实例名称不能为空"
+        echo "❌ 实例名称不能为空 Instance name cannot be empty"
         return
     fi
     
     if [ "$instance_to_delete" = "scripts" ]; then
-        echo "❌ 不能删除 scripts 目录"
+        echo "❌ 不能删除 scripts 目录 Cannot delete scripts directory"
         return
     fi
     
     if [ ! -d "$CLAUDE_INSTANCES_BASE/$instance_to_delete" ]; then
-        echo "❌ 实例 '$instance_to_delete' 不存在"
+        echo "❌ 实例 '$instance_to_delete' 不存在 Instance '$instance_to_delete' does not exist"
         return
     fi
     
     echo ""
-    echo "⚠️  将要删除实例: $instance_to_delete"
-    echo "这将删除以下内容:"
-    echo "  - 实例配置目录: $CLAUDE_INSTANCES_BASE/$instance_to_delete"
-    echo "  - 应用包装器 (如果存在): /Applications/Claude-$instance_to_delete.app"
+    echo "⚠️  将要删除实例 Will delete instance: $instance_to_delete"
+    echo "这将删除以下内容 This will delete the following content:"
+    echo "  - 实例配置目录 Instance config directory: $CLAUDE_INSTANCES_BASE/$instance_to_delete"
+    echo "  - 应用包装器 App wrapper (如果存在 if exists): /Applications/Claude-$instance_to_delete.app"
     echo ""
-    read -p "确认删除? (yes/NO): " confirm
+    read -p "确认删除 Confirm deletion? (yes/NO): " confirm
     
     if [ "$confirm" != "yes" ] && [ "$confirm" != "YES" ]; then
-        echo "❌ 取消删除"
+        echo "❌ 取消删除 Deletion cancelled"
         return
     fi
     
     echo ""
-    echo "🗑️  正在删除实例: $instance_to_delete"
+    echo "🗑️  正在删除实例 Deleting instance: $instance_to_delete"
     
     # 删除实例目录
     if [ -d "$CLAUDE_INSTANCES_BASE/$instance_to_delete" ]; then
         rm -rf "$CLAUDE_INSTANCES_BASE/$instance_to_delete"
-        echo "✅ 删除实例目录"
+        echo "✅ 删除实例目录 Deleted instance directory"
     fi
     
     # 删除应用包装器
     if [ -d "/Applications/Claude-$instance_to_delete.app" ]; then
         rm -rf "/Applications/Claude-$instance_to_delete.app"
-        echo "✅ 删除应用包装器"
+        echo "✅ 删除应用包装器 Deleted app wrapper"
     fi
     
-    echo "✅ 实例 '$instance_to_delete' 删除完成"
+    echo "✅ 实例 '$instance_to_delete' 删除完成 Instance '$instance_to_delete' deletion completed"
 }
 
 # 复制 Claude 图标
@@ -316,34 +316,34 @@ create_app_wrapper_menu() {
     echo ""
     
     if [ ! -d "$CLAUDE_INSTANCES_BASE" ]; then
-        echo "❌ 未找到任何实例，请先创建实例"
+        echo "❌ 未找到任何实例，请先创建实例 No instances found, please create an instance first"
         return
     fi
     
-    echo "现有实例:"
+    echo "现有实例 Existing instances:"
     ls -1 "$CLAUDE_INSTANCES_BASE" 2>/dev/null | grep -v "^scripts$" | sed 's/^/  - /' | nl
     
     echo ""
-    read -p "为哪个实例创建应用包装器: " instance_name
+    read -p "为哪个实例创建应用包装器 Create app wrapper for which instance: " instance_name
     
     if [ -z "$instance_name" ]; then
-        echo "❌ 实例名称不能为空"
+        echo "❌ 实例名称不能为空 Instance name cannot be empty"
         return
     fi
     
     if [ "$instance_name" = "scripts" ]; then
-        echo "❌ scripts 不是有效的实例名称"
+        echo "❌ scripts 不是有效的实例名称 'scripts' is not a valid instance name"
         return
     fi
     
     if [ ! -d "$CLAUDE_INSTANCES_BASE/$instance_name" ]; then
-        echo "❌ 实例 '$instance_name' 不存在"
+        echo "❌ 实例 '$instance_name' 不存在 Instance '$instance_name' does not exist"
         return
     fi
     
     # 默认显示名称
     default_display_name="Claude $(echo "$instance_name" | sed 's/.*/\L&/' | sed 's/\b\w/\U&/g')"
-    read -p "应用显示名称 [$default_display_name]: " display_name
+    read -p "应用显示名称 App display name [$default_display_name]: " display_name
     
     if [ -z "$display_name" ]; then
         display_name="$default_display_name"
@@ -472,13 +472,13 @@ EOF
     echo "   - $0 restore                 # 恢复原始配置"
 }
 
-# 启动实例函数
+# 启动实例函数 Launch Instance Function
 launch_instance() {
     local instance_name="$1"
     local instance_dir="$CLAUDE_INSTANCES_BASE/$instance_name"
     
     echo ""
-    echo "🚀 启动 Claude Desktop 实例: $instance_name"
+    echo "🚀 启动 Claude Desktop 实例 Launch Claude Desktop instance: $instance_name"
     
     # 创建实例目录
     mkdir -p "$instance_dir/Application Support/Claude"
@@ -487,12 +487,12 @@ launch_instance() {
     
     # 初始化配置文件
     if [ ! -f "$instance_dir/Application Support/Claude/claude_desktop_config.json" ]; then
-        echo "📄 初始化配置文件..."
+        echo "📄 初始化配置文件 Initialize configuration file..."
         
         # 如果存在原始配置，复制它
         if [ -f "$ORIGINAL_CLAUDE_DIR/claude_desktop_config.json" ]; then
             cp "$ORIGINAL_CLAUDE_DIR/claude_desktop_config.json" "$instance_dir/Application Support/Claude/"
-            echo "✅ 复制默认配置"
+            echo "✅ 复制默认配置 Copy default configuration"
         else
             # 创建基础配置
             cat > "$instance_dir/Application Support/Claude/claude_desktop_config.json" << 'EOF'
@@ -500,7 +500,7 @@ launch_instance() {
   "mcpServers": {}
 }
 EOF
-            echo "✅ 创建基础配置"
+            echo "✅ 创建基础配置 Create basic configuration"
         fi
     fi
     
@@ -522,24 +522,25 @@ EOF
     echo "🔗 创建配置链接"
     
     # 启动 Claude Desktop
-    echo "▶️  启动 Claude Desktop..."
+    echo "▶️  启动 Claude Desktop Launch Claude Desktop..."
     open -n "/Applications/Claude.app"
     
     echo ""
-    echo "✅ Claude Desktop 已启动!"
-    echo "📂 实例配置目录: $instance_dir"
-    echo "⚙️  配置文件: $instance_dir/Application Support/Claude/claude_desktop_config.json"
+    echo "✅ Claude Desktop 已启动 Claude Desktop has been launched!"
+    echo "📂 实例配置目录 Instance config directory: $instance_dir"
+    echo "⚙️  配置文件 Configuration file: $instance_dir/Application Support/Claude/claude_desktop_config.json"
     echo ""
     
     # 询问是否创建应用包装器
     if [ ! -d "/Applications/Claude-$instance_name.app" ]; then
-        echo "💡 提示: 可以为此实例创建应用包装器"
+        echo "💡 提示 Tip: 可以为此实例创建应用包装器 You can create an app wrapper for this instance"
         echo "   这样在 Dock 中会显示为 'Claude $instance_name' 而不是 'Claude'"
-        read -p "现在创建应用包装器吗? (y/N): " create_wrapper
+        echo "   This way it will show as 'Claude $instance_name' instead of 'Claude' in Dock"
+        read -p "现在创建应用包装器吗 Create app wrapper now? (y/N): " create_wrapper
         
         if [ "$create_wrapper" = "y" ] || [ "$create_wrapper" = "Y" ]; then
             default_name="Claude $(echo "$instance_name" | sed 's/.*/\L&/' | sed 's/\b\w/\U&/g')"
-            read -p "应用显示名称 [$default_name]: " display_name
+            read -p "应用显示名称 App display name [$default_name]: " display_name
             if [ -z "$display_name" ]; then
                 display_name="$default_name"
             fi
@@ -550,10 +551,13 @@ EOF
     fi
     
     echo ""
-    echo "💡 使用提示:"
+    echo "💡 使用提示 Usage Tips:"
     echo "   - 关闭 Claude 后运行 '$0' 选择选项 6 恢复原始配置"
+    echo "     After closing Claude, run '$0' and select option 6 to restore original config"
     echo "   - 或运行 '$0 [其他实例名]' 切换到其他实例"
+    echo "     Or run '$0 [other_instance_name]' to switch to other instance"
     echo "   - 每个实例可以有独立的 MCP 服务器配置"
+    echo "     Each instance can have independent MCP server configurations"
     
     # 创建快速切换脚本
     create_quick_scripts "$instance_name"
@@ -569,8 +573,9 @@ echo "======================================"
 
 # 检查 Claude 是否已安装
 if [ ! -d "/Applications/Claude.app" ]; then
-    echo "❌ 错误: 未找到 Claude Desktop 应用"
+    echo "❌ 错误 Error: 未找到 Claude Desktop 应用 Claude Desktop app not found"
     echo "请先从 https://claude.ai/download 下载并安装 Claude Desktop"
+    echo "Please download and install Claude Desktop from https://claude.ai/download first"
     exit 1
 fi
 
@@ -582,26 +587,26 @@ case "$1" in
             INSTANCE_TO_DELETE="$2"
             
             if [ "$INSTANCE_TO_DELETE" = "scripts" ]; then
-                echo "❌ 不能删除 scripts 目录"
+                echo "❌ 不能删除 scripts 目录 Cannot delete scripts directory"
                 exit 1
             fi
             
-            echo "🗑️  删除实例: $INSTANCE_TO_DELETE"
+            echo "🗑️  删除实例 Delete instance: $INSTANCE_TO_DELETE"
             
             if [ ! -d "$CLAUDE_INSTANCES_BASE/$INSTANCE_TO_DELETE" ]; then
-                echo "❌ 实例 '$INSTANCE_TO_DELETE' 不存在"
+                echo "❌ 实例 '$INSTANCE_TO_DELETE' 不存在 Instance '$INSTANCE_TO_DELETE' does not exist"
                 exit 1
             fi
             
-            echo "⚠️  确认删除实例 '$INSTANCE_TO_DELETE'? (yes/NO):"
+            echo "⚠️  确认删除实例 Confirm deletion of instance '$INSTANCE_TO_DELETE'? (yes/NO):"
             read -p "> " confirm
             
             if [ "$confirm" = "yes" ] || [ "$confirm" = "YES" ]; then
                 rm -rf "$CLAUDE_INSTANCES_BASE/$INSTANCE_TO_DELETE"
                 [ -d "/Applications/Claude-$INSTANCE_TO_DELETE.app" ] && rm -rf "/Applications/Claude-$INSTANCE_TO_DELETE.app"
-                echo "✅ 实例 '$INSTANCE_TO_DELETE' 已删除"
+                echo "✅ 实例 '$INSTANCE_TO_DELETE' 已删除 Instance '$INSTANCE_TO_DELETE' deleted"
             else
-                echo "❌ 取消删除"
+                echo "❌ 取消删除 Deletion cancelled"
             fi
         else
             delete_instance_menu
@@ -613,13 +618,13 @@ case "$1" in
             # 为指定实例创建包装器
             INSTANCE_FOR_WRAPPER="$2"
             if [ ! -d "$CLAUDE_INSTANCES_BASE/$INSTANCE_FOR_WRAPPER" ]; then
-                echo "❌ 实例 '$INSTANCE_FOR_WRAPPER' 不存在"
+                echo "❌ 实例 '$INSTANCE_FOR_WRAPPER' 不存在 Instance '$INSTANCE_FOR_WRAPPER' does not exist"
                 exit 1
             fi
             
             default_name="Claude $(echo "$INSTANCE_FOR_WRAPPER" | sed 's/.*/\L&/' | sed 's/\b\w/\U&/g')"
-            echo "为实例 '$INSTANCE_FOR_WRAPPER' 创建应用包装器"
-            read -p "显示名称 [$default_name]: " display_name
+            echo "为实例 '$INSTANCE_FOR_WRAPPER' 创建应用包装器 Create app wrapper for instance '$INSTANCE_FOR_WRAPPER'"
+            read -p "显示名称 Display name [$default_name]: " display_name
             if [ -z "$display_name" ]; then
                 display_name="$default_name"
             fi
@@ -635,9 +640,9 @@ case "$1" in
         if [ -f "$CLAUDE_INSTANCES_BASE/scripts/list.sh" ]; then
             "$CLAUDE_INSTANCES_BASE/scripts/list.sh"
         else
-            echo "Claude Desktop 实例列表:"
+            echo "Claude Desktop 实例列表 Instance List:"
             echo "========================"
-            ls -1 "$CLAUDE_INSTANCES_BASE" 2>/dev/null | grep -v "^scripts$" | sed 's/^/  - /' || echo "  (暂无实例)"
+            ls -1 "$CLAUDE_INSTANCES_BASE" 2>/dev/null | grep -v "^scripts$" | sed 's/^/  - /' || echo "  (暂无实例 No instances)"
         fi
         exit 0
         ;;
@@ -690,15 +695,15 @@ case "$1" in
         
         for app in /Applications/Claude-*.app; do
             if [ -d "$app" ]; then
-                echo "🔨 修复: $app"
+                echo "🔨 修复 Repairing: $app"
                 
                 # 确保启动脚本有执行权限
                 launcher="$app/Contents/MacOS/claude-launcher"
                 if [ -f "$launcher" ]; then
                     chmod +x "$launcher"
-                    echo "   ✅ 设置启动脚本执行权限"
+                    echo "   ✅ 设置启动脚本执行权限 Set launcher script executable permissions"
                 else
-                    echo "   ❌ 启动脚本不存在: $launcher"
+                    echo "   ❌ 启动脚本不存在 Launcher script not found: $launcher"
                 fi
                 
                 # 检查并修复图标
@@ -745,16 +750,16 @@ if [ "$1" = "" ]; then
                 echo "现有实例 Existing instances:"
                 ls -1 "$CLAUDE_INSTANCES_BASE" 2>/dev/null | grep -v "^scripts$" | sed 's/^/  - /'
                 echo ""
-                read -p "输入实例名称: " INSTANCE_NAME
+                read -p "输入实例名称 Enter instance name: " INSTANCE_NAME
             else
-                echo "未找到现有实例，使用默认实例"
+                echo "未找到现有实例，使用默认实例 No existing instances found, using default instance"
                 INSTANCE_NAME="default"
             fi
             ;;
         3)
             echo ""
-            read -p "新实例名称: " INSTANCE_NAME
-            echo "将创建并启动新实例: $INSTANCE_NAME"
+            read -p "新实例名称 New instance name: " INSTANCE_NAME
+            echo "将创建并启动新实例 Will create and launch new instance: $INSTANCE_NAME"
             ;;
         4)
             delete_instance_menu
@@ -820,20 +825,20 @@ if [ "$1" = "" ]; then
             ;;
         8)
             # 运行修复
-            echo "🔧 修复 Claude Desktop 包装器"
+            echo "🔧 修复 Claude Desktop 包装器 Repair Claude Desktop Wrappers"
             echo "============================="
             
             for app in /Applications/Claude-*.app; do
                 if [ -d "$app" ]; then
-                    echo "🔨 修复: $app"
+                    echo "🔨 修复 Repairing: $app"
                     
                     # 确保启动脚本有执行权限
                     launcher="$app/Contents/MacOS/claude-launcher"
                     if [ -f "$launcher" ]; then
                         chmod +x "$launcher"
-                        echo "   ✅ 设置启动脚本执行权限"
+                        echo "   ✅ 设置启动脚本执行权限 Set launcher script executable permissions"
                     else
-                        echo "   ❌ 启动脚本不存在: $launcher"
+                        echo "   ❌ 启动脚本不存在 Launcher script not found: $launcher"
                     fi
                     
                     # 检查并修复图标
@@ -844,11 +849,11 @@ if [ "$1" = "" ]; then
                 fi
             done
             
-            echo "✅ 修复完成"
+            echo "✅ 修复完成 Repair completed"
             exit 0
             ;;
         *)
-            echo "无效选择，使用默认实例"
+            echo "无效选择，使用默认实例 Invalid selection, using default instance"
             INSTANCE_NAME="default"
             ;;
     esac
