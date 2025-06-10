@@ -104,6 +104,7 @@ This is a tool for running multiple independent Claude Desktop instances on macO
 ## 更新历史 Update History
 
 - 主脚本界面改为中英文双语显示
-- README.md 增加 Spotlight 搜索功能说明
+- README.md 和 README_CN.md 都增加 Spotlight 搜索功能说明
 - 添加 spotlight.png 截图展示
 - 完善应用包装器的说明文档
+- 中英文文档保持同步更新

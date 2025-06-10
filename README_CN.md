@@ -7,6 +7,11 @@
 ### 多窗口运行效果
 ![多实例运行演示](docs/screenshots/demo.png)
 
+### Spotlight 搜索集成
+![Spotlight搜索显示多个Claude实例](docs/screenshots/spotlight.png)
+
+*使用 Spotlight (⌘+空格) 快速查找和启动不同的 Claude 实例。每个应用包装器都显示为独立的应用程序，能够保持登录状态和配置。*
+
 ### Dock 中的自定义显示名称
 ![第一个实例名称](docs/screenshots/icon-name1.png) ![第二个实例名称](docs/screenshots/icon-name2.png)
 
@@ -18,6 +23,7 @@
 - 🏷️ **自定义显示名称** - 在 Dock 中显示不同的应用名称（如 "Claude Work", "Claude Personal"）
 - ⚙️ **独立配置** - 每个实例拥有独立的 MCP 服务器配置和登录信息
 - 📱 **应用包装器** - 创建独立的应用图标，可直接从 Launchpad 启动
+- 🔍 **Spotlight 集成** - 使用 Spotlight 搜索 (⌘+空格) 快速查找和启动实例
 - 🛠️ **智能诊断** - 内置问题诊断和修复工具
 - 💡 **简单易用** - 交互式菜单和命令行两种使用方式
 
@@ -129,8 +135,9 @@ chmod +x claude_quick.sh
 ./claude_quick.sh wrapper work
 # 输入显示名称: Claude Work
 
-# 现在可以从 Launchpad 直接启动 "Claude Work"
+# 现在可以从 Launchpad 或 Spotlight 直接启动 "Claude Work"
 # 在 Dock 中会显示为 "Claude Work" 而不是 "Claude"
+# 每个包装器都保持独立的登录状态和配置
 ```
 
 ## 📁 文件结构
