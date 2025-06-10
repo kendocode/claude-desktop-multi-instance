@@ -2,6 +2,10 @@
 
 > 🚀 Run multiple Claude Desktop instances simultaneously on macOS with independent configurations, accounts, and MCP server settings
 
+**📖 Documentation Language / 文档语言:**
+- **English**: You are reading the English version
+- **中文**: [中文文档 (Chinese Documentation)](README_CN.md)
+
 ## 📸 Screenshots
 
 ### Multi-Window Running Effect

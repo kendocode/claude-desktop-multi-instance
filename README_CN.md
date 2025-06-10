@@ -2,6 +2,10 @@
 
 > 🚀 在 macOS 上同时运行多个 Claude Desktop 实例，每个实例独立配置、独立账户、独立 MCP 服务器设置
 
+**📖 文档语言 / Documentation Language:**
+- **中文**: 您正在阅读中文版本
+- **English**: [English Documentation (英文文档)](README.md)
+
 ## 📸 效果展示
 
 ### 多窗口运行效果
