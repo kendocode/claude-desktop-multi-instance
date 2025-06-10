@@ -108,3 +108,5 @@ This is a tool for running multiple independent Claude Desktop instances on macO
 - 添加 spotlight.png 截图展示
 - 完善应用包装器的说明文档
 - 中英文文档保持同步更新
+- 完成脚本所有用户交互提示的双语化
+- 在两个文档之间添加相互引用，方便用户切换语言
