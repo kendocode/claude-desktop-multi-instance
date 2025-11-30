@@ -286,15 +286,26 @@ ln -sf "$INSTANCE_DIR/Application Support/Claude" "$ORIGINAL_CLAUDE_DIR"
 echo "🔗 配置已切换到实例: $INSTANCE_NAME"
 
 # 启动原始 Claude 应用
+# 使用 open -n 而不是 exec 来避免继承包装器的架构上下文
+# Use open -n instead of exec to avoid inheriting wrapper's architecture context
 echo "▶️  启动 Claude Desktop..."
-exec "$CLAUDE_EXECUTABLE" "$@"
+open -n "/Applications/Claude.app"
 LAUNCHER_EOF
     
     chmod +x "$wrapper_path/Contents/MacOS/claude-launcher"
     echo "✅ 设置启动脚本执行权限"
-    
+
     # 复制图标
     copy_claude_icon "$wrapper_path/Contents/Resources"
+
+    # Ad-hoc 代码签名 (防止 Launch Services 错误和 Rosetta 提示)
+    # Ad-hoc code signing (prevents Launch Services errors and Rosetta prompts)
+    if codesign --force --deep --sign - "$wrapper_path" 2>/dev/null; then
+        echo "✅ 应用包装器已签名 App wrapper signed"
+    else
+        echo "⚠️  代码签名失败，可能需要手动签名 Code signing failed, may need manual signing"
+        echo "   运行 Run: codesign --force --deep --sign - \"$wrapper_path\""
+    fi
     
     echo "✅ 应用包装器创建完成!"
     echo "📱 应用路径: $wrapper_path"
@@ -711,9 +722,21 @@ case "$1" in
                     echo "   🎨 修复图标..."
                     copy_claude_icon "$app/Contents/Resources"
                 fi
+
+                # 检查并修复代码签名
+                if ! codesign -v "$app" 2>/dev/null; then
+                    echo "   🔐 添加代码签名..."
+                    if codesign --force --deep --sign - "$app" 2>/dev/null; then
+                        echo "   ✅ 代码签名已添加 Code signature added"
+                    else
+                        echo "   ⚠️  代码签名失败 Code signing failed"
+                    fi
+                else
+                    echo "   ✅ 代码签名正常 Code signature OK"
+                fi
             fi
         done
-        
+
         echo "✅ 修复完成"
         exit 0
         ;;
@@ -846,9 +869,21 @@ if [ "$1" = "" ]; then
                         echo "   🎨 修复图标..."
                         copy_claude_icon "$app/Contents/Resources"
                     fi
+
+                    # 检查并修复代码签名
+                    if ! codesign -v "$app" 2>/dev/null; then
+                        echo "   🔐 添加代码签名..."
+                        if codesign --force --deep --sign - "$app" 2>/dev/null; then
+                            echo "   ✅ 代码签名已添加 Code signature added"
+                        else
+                            echo "   ⚠️  代码签名失败 Code signing failed"
+                        fi
+                    else
+                        echo "   ✅ 代码签名正常 Code signature OK"
+                    fi
                 fi
             done
-            
+
             echo "✅ 修复完成 Repair completed"
             exit 0
             ;;
