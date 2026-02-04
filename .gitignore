@@ -23,3 +23,6 @@ Thumbs.db
 
 # User-specific instance data (if accidentally included)
 .claude-instances/
+
+# Claude Code local settings
+.claude/

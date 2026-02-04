@@ -283,6 +283,24 @@ Please ensure Claude Desktop is installed in Applications folder.\" buttons {\"O
     exit 1
 fi
 
+# 如果 Claude 正在运行，先退出它 Quit Claude if running
+if pgrep -x "Claude" > /dev/null; then
+    echo "⏹️  退出 Claude Desktop Quitting Claude Desktop..."
+    osascript -e 'tell application "Claude" to quit' 2>/dev/null
+    # 等待 Claude 完全退出 Wait for Claude to fully quit
+    for i in {1..10}; do
+        if ! pgrep -x "Claude" > /dev/null; then
+            break
+        fi
+        sleep 0.5
+    done
+    # 如果还没退出，强制退出 Force quit if still running
+    if pgrep -x "Claude" > /dev/null; then
+        pkill -9 Claude 2>/dev/null
+        sleep 1
+    fi
+fi
+
 # 同步当前工作目录到之前的配置文件（如果有）
 # Sync current working directory to previous profile (if any)
 if [ -f "$STATE_FILE" ]; then
@@ -315,10 +333,10 @@ fi
 
 # 使用 APFS 克隆复制配置文件 Clone profile using APFS clone
 echo "📋 克隆配置文件 Cloning profile: $INSTANCE_NAME"
-if cp -cR "$SOURCE_DIR" "$ORIGINAL_CLAUDE_DIR" 2>/dev/null; then
+if /bin/cp -cR "$SOURCE_DIR" "$ORIGINAL_CLAUDE_DIR" 2>/dev/null; then
     echo "✅ APFS 克隆完成 APFS clone complete"
 else
-    cp -R "$SOURCE_DIR" "$ORIGINAL_CLAUDE_DIR"
+    /bin/cp -R "$SOURCE_DIR" "$ORIGINAL_CLAUDE_DIR"
     echo "✅ 复制完成 Copy complete"
 fi
 
@@ -332,6 +350,8 @@ EOF
 # Use open -n to avoid inheriting wrapper's architecture context
 echo "▶️  启动 Claude Desktop..."
 open -n "/Applications/Claude.app"
+
+exit 0
 LAUNCHER_EOF
     
     chmod +x "$wrapper_path/Contents/MacOS/claude-launcher"
@@ -599,12 +619,12 @@ EOF
 
     # Step 3: Clone the profile to working directory using APFS clone
     echo "📋 克隆配置文件 Cloning profile: $instance_name"
-    if cp -cR "$source_dir" "$ORIGINAL_CLAUDE_DIR" 2>/dev/null; then
+    if /bin/cp -cR "$source_dir" "$ORIGINAL_CLAUDE_DIR" 2>/dev/null; then
         echo "✅ APFS 克隆完成 APFS clone complete (instant copy-on-write)"
     else
         # Fallback for non-APFS or cross-filesystem
         echo "⚠️  APFS 克隆不可用，使用标准复制 APFS clone unavailable, using standard copy"
-        cp -R "$source_dir" "$ORIGINAL_CLAUDE_DIR"
+        /bin/cp -R "$source_dir" "$ORIGINAL_CLAUDE_DIR"
         echo "✅ 复制完成 Copy complete"
     fi
 
