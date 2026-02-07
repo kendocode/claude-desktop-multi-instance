@@ -10,6 +10,7 @@ Thumbs.db
 # Backup files
 *.backup.*
 *.bak
+wrapper-backups/
 
 # Temporary files
 *.tmp
