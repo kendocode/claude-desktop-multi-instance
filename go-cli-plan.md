@@ -118,6 +118,141 @@ require (
 
 ---
 
+## Why Cobra: Extensibility Analysis
+
+### The Core Question
+
+Is Cobra a good choice for an application that may grow beyond CLI usage—potentially serving HTTP APIs, MCP servers, native GUIs, or integrating with external tools?
+
+**Answer: Yes.** Cobra adds no architectural constraints that would limit future growth, provided the application follows a layered design.
+
+### Architectural Principle: Separation of Concerns
+
+The key is keeping Cobra isolated to the interface layer:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                   Interface Layer                        │
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌────────────┐  │
+│  │  Cobra  │  │  HTTP   │  │   MCP   │  │ Swift/GUI  │  │
+│  │   CLI   │  │   API   │  │ Server  │  │  (future)  │  │
+│  └────┬────┘  └────┬────┘  └────┬────┘  └─────┬──────┘  │
+└───────┼───────────┼───────────┼──────────────┼──────────┘
+        │           │           │              │
+        ▼           ▼           ▼              ▼
+┌─────────────────────────────────────────────────────────┐
+│                  Core Library Layer                      │
+│    (profiles, instances, cloning, sync, state mgmt)     │
+│              No CLI/HTTP/UI dependencies                 │
+└─────────────────────────────────────────────────────────┘
+```
+
+- **Core packages** (`internal/profile/`, `internal/platform/`, etc.) contain all business logic with zero knowledge of Cobra
+- **CLI commands** (`internal/cli/`) are thin wrappers that parse flags and call core functions
+- **Future interfaces** call the same core functions through different entry points
+
+### One Binary, Multiple Modes
+
+A single binary can serve multiple purposes based on invocation:
+
+```bash
+# CLI mode: runs command, exits immediately
+cpm switch work
+cpm list
+cpm create personal
+
+# Long-running server modes (future)
+cpm serve --mcp      # Start MCP server, block until killed
+cpm serve --http     # Start HTTP API, block until killed
+cpm daemon start     # Background sync process
+```
+
+This is exactly how established tools work:
+- `kubectl` - CLI tool that can also run as a library
+- `gh` (GitHub CLI) - Commands + can serve as API wrapper
+- `docker` - CLI that communicates with daemon
+
+### Why This Works for Growing Applications
+
+1. **Subcommand structure scales naturally**
+   - Today: `cpm switch`, `cpm list`, `cpm sync`
+   - Tomorrow: `cpm serve mcp`, `cpm serve http`, `cpm jira ticket create`
+   - Cobra's nested command model handles arbitrary depth
+
+2. **No runtime overhead when unused**
+   - Cobra only executes during CLI parsing
+   - Server modes bypass CLI after initial command dispatch
+   - Core library has no Cobra dependency whatsoever
+
+3. **Minimal binary size impact**
+   - Adds ~2MB to binary (negligible for desktop tools)
+   - No runtime memory overhead beyond initial parse
+
+4. **Familiar patterns**
+   - Well-documented, battle-tested in major projects
+   - Skills transfer across projects using Cobra
+
+### Practical Example: Adding an MCP Server
+
+When adding MCP server capability, the change is additive:
+
+```go
+// internal/cli/serve.go (NEW)
+var serveCmd = &cobra.Command{
+    Use:   "serve",
+    Short: "Run as a server",
+}
+
+var serveMcpCmd = &cobra.Command{
+    Use:   "mcp",
+    Short: "Run as MCP server",
+    Run: func(cmd *cobra.Command, args []string) {
+        // Create core manager (same as CLI uses)
+        mgr := profile.NewManager(platform.Detect())
+
+        // Create MCP server, inject core manager
+        server := mcp.NewServer(mgr)
+        server.ListenAndServe()  // Blocks
+    },
+}
+```
+
+The core `profile.Manager` is identical to what CLI commands use. The MCP server is just another consumer.
+
+### Application to Multi-Purpose Work Tools
+
+For tools that integrate with Jira, GitHub, Sentry, wrap MCPs, etc.:
+
+```
+work-tool/
+├── cmd/work/main.go
+├── internal/
+│   ├── cli/              # Cobra commands (thin wrappers)
+│   ├── mcp/              # MCP server implementation
+│   ├── api/              # HTTP API server
+│   ├── jira/             # Jira integration (core)
+│   ├── github/           # GitHub integration (core)
+│   └── sentry/           # Sentry integration (core)
+```
+
+- `work jira ticket create` → CLI command → calls `jira.CreateTicket()`
+- `work serve mcp` → MCP server → exposes `jira.CreateTicket()` as MCP tool
+- `work serve http` → HTTP API → exposes `jira.CreateTicket()` as REST endpoint
+
+Same core, different interfaces. Cobra lives only in `internal/cli/`.
+
+### Conclusion
+
+Cobra is a good choice because:
+1. It solves the CLI problem well without imposing constraints elsewhere
+2. The subcommand model accommodates growth in any direction
+3. Proper layering means Cobra can be supplemented (not replaced) as needs evolve
+4. There's no downside to including it—it doesn't "infect" the codebase
+
+The answer to "CLI now, other interfaces later" is: **one binary, multiple commands, shared core.**
+
+---
+
 ## Core Features (Phase 1: Parity)
 
 ### Commands
