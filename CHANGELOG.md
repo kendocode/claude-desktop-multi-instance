@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Fixed
+- **Auth tokens lost on same-profile relaunch**: The wrapper launcher scripts only synced the working directory back to the profile when switching to a *different* profile. When relaunching the same profile (the normal case), the sync was skipped, the working directory was deleted, and a fresh clone was made from the stale profile — losing OAuth tokens (`oauth:tokenCache` in `config.json`) written during the previous session. This caused users to be prompted to sign in on every launch. Fixed by always syncing the working directory back to the active profile before cloning, regardless of whether the target profile is the same or different.
+
 - **APFS clone compatibility with GNU coreutils**: Changed `cp -cR` to `/bin/cp -cR` throughout the script and embedded launcher. Systems with GNU coreutils installed (common for developers coming from Linux) would shadow macOS's native `cp`, causing APFS clones to fail silently and fall back to slow full copies. Now explicitly calls macOS's `/bin/cp` which supports the `-c` flag for copy-on-write clones.
 
 - **Cowork/virtiofs compatibility**: Fixed issue where working directory was created as a symlink instead of an APFS clone. Virtiofs (used by Cowork's VM) cannot traverse symlinks pointing outside the mounted directory tree, causing "SDK version not verified" errors. The working directory (`~/Library/Application Support/Claude`) is now always a real directory cloned from the profile.

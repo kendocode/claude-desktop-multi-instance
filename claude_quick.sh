@@ -301,14 +301,14 @@ if pgrep -x "Claude" > /dev/null; then
     fi
 fi
 
-# 同步当前工作目录到之前的配置文件（如果有）
-# Sync current working directory to previous profile (if any)
+# 同步当前工作目录到活动配置文件（保留登录状态等运行时更改）
+# Sync current working directory to active profile (preserves auth tokens and runtime changes)
 if [ -f "$STATE_FILE" ]; then
     source "$STATE_FILE"
-    if [ -n "$ACTIVE_PROFILE" ] && [ "$ACTIVE_PROFILE" != "$INSTANCE_NAME" ]; then
+    if [ -n "$ACTIVE_PROFILE" ]; then
         PREV_PROFILE_DIR="$CLAUDE_INSTANCES_BASE/$ACTIVE_PROFILE/Application Support/Claude"
         if [ -d "$ORIGINAL_CLAUDE_DIR" ] && [ ! -L "$ORIGINAL_CLAUDE_DIR" ] && [ -d "$PREV_PROFILE_DIR" ]; then
-            echo "📤 同步之前的配置文件 Syncing previous profile: $ACTIVE_PROFILE"
+            echo "📤 同步配置文件 Syncing profile: $ACTIVE_PROFILE"
             rsync -a --delete "$ORIGINAL_CLAUDE_DIR/" "$PREV_PROFILE_DIR/" 2>/dev/null
         fi
     fi
